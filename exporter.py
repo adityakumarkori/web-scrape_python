@@ -62,11 +62,10 @@ def _format_percentage_cell(cell, value):
 def _set_cell_style(cell, is_header=False, is_currency=False, is_percentage=False):
     """Apply consistent styling to a cell."""
     if is_header:
-        cell.font = Font(bold=True, color="FFFFFF")
+        cell.font = Font(bold=True, color="FFFFFF", size=11)
         cell.fill = PatternFill(start_color="4472C4", end_color="4472C4", fill_type="solid")
-        cell.font.size = 11
     else:
-        cell.font.size = 10
+        cell.font = Font(size=10)
     
     cell.alignment = Alignment(wrap_text=True, vertical="center")
     cell.border = Border(
