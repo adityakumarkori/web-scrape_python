@@ -13,8 +13,7 @@ from datetime import datetime
 from database import connect_db, close_db, get_collection, init_indexes, save_products, get_product_count
 
 # Clear existing test data
-client = connect_db()
-db = client[os.environ['MONGODB_DATABASE']]
+client, db = connect_db()
 
 collection_granit = db['granit_products']
 collection_granit.delete_many({})

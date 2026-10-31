@@ -16,14 +16,14 @@ _initialized_datasets = set()
 def connect_db():
     """Connect to MongoDB using the existing MONGODB_URI configuration.
     
-    Returns the MongoDB client instance (backward compatible).
-    Use get_database() to access the database.
+    Returns (client, database) tuple.
+    Use get_database() to access the database instance.
     """
     global _client, _database
     
     # Check if already connected
     if _client is not None and _database is not None:
-        return _client
+        return _client, _database
     
     uri = config.MONGODB_URI
     if not uri:
@@ -36,7 +36,7 @@ def connect_db():
         _client.admin.command("ping")
         _database = _client[config.MONGODB_DATABASE]
         _initialized_datasets = set()
-        return _client
+        return _client, _database
     except (ConnectionFailure, ServerSelectionTimeoutError) as e:
         _client = None
         _database = None
@@ -334,8 +334,8 @@ def get_validation_errors(dataset: str) -> list:
 def check_connection():
     """Check MongoDB connection status (backward compatible)."""
     try:
-        client = connect_db()
-        client.admin.command("ping")
+        client, db = connect_db()
+        db.command("ping")
         return True, "Connected"
     except ConnectionError as e:
         return False, str(e)
