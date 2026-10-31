@@ -55,3 +55,38 @@ INVENTORY_FIELDS = [
     "estimated_delivery",
     "logistics_source",
 ]
+
+REQUIRED_FIELDS = ["article_number", "product_name"]
+
+EXTRACTION_CONFIG = {
+    "enabled": False,
+    "name": "granit_catalog",
+    "allowed_domains": ["granit-parts.com", "www.granit-parts.com"],
+    "base_urls": [],
+    "pagination": {
+        "enabled": False,
+        "next_selector": "a.next-page, a.pagination-next, li.next a",
+        "max_pages": 10,
+    },
+    "json_ld_types": ["Product", "AutoPartsProduct"],
+    "field_selectors": {
+        "article_number": "[data-article-number], .article-number, [itemprop=sku]",
+        "product_name": "[itemprop=name], h1.product-title, .product-name",
+        "description": "[itemprop=description], .product-description",
+        "manufacturer": "[itemprop=manufacturer], .manufacturer",
+        "brand": "[itemprop=brand], .brand",
+        "category": "[itemprop=category], .category",
+        "ean_gtin": "[itemprop=gtin], [itemprop=gtin13], .ean, .gtin",
+        "image_url": "[itemprop=image], .product-image img",
+    },
+}
+
+ISO_COUNTRY_CODES = {
+    "Austria", "Belgium", "Bulgaria", "Croatia", "Cyprus", "Czech Republic",
+    "Denmark", "Estonia", "Finland", "France", "Germany", "Greece", "Hungary",
+    "Ireland", "Italy", "Latvia", "Lithuania", "Luxembourg", "Malta",
+    "Netherlands", "Poland", "Portugal", "Romania", "Slovakia", "Slovenia",
+    "Spain", "Sweden", "Switzerland", "United Kingdom", "Norway"
+}
+
+ISO_CURRENCY_CODES = {"EUR", "GBP", "CHF", "SEK", "NOK", "DKK", "PLN", "CZK", "HUF", "RON", "BGN", "HRK"}

@@ -73,33 +73,64 @@ python main.py --dataset blinkit
 
 # Process both datasets
 python main.py --dataset all
+
+# Enable web scraping (requires approved source configuration)
+python main.py --dataset granit --scrape
+
+# Limit records processed
+python main.py --dataset all --max-records 50
+
+# Specify custom input directory
+python main.py --dataset granit --input ./data/granit
 ```
 
-## Current Phase 1 Functionality
+## Current Phase 2 Functionality
 
-Phase 1 provides the project foundation:
+Phase 2 provides web scraping and data processing capabilities:
 
-- ✅ Configuration loading from `.env`
-- ✅ MongoDB Atlas connection manager with ping verification
-- ✅ Separate dataset profiles (GRANIT and Blinkit) with field definitions
-- ✅ CLI with argparse supporting dataset selection
-- ✅ Unit tests for configuration, database, and profiles
-- ✅ Clean project structure
+- ✅ **Reusable Synchronous Scraper** (`scraper.py`)
+  - URL safety validation (SSRF protection: blocks localhost, private IPs, link-local)
+  - Configurable request timeout, delay, and user-agent
+  - HTTP/HTTPS only, redirect validation against allowed domains
+  - HTML parsing with BeautifulSoup4
+  - JSON-LD structured data extraction (schema.org Product types)
+  - Open Graph / Twitter Card / metadata extraction
+  - CSS selector-based field extraction (configurable per profile)
+  - Pagination support with configurable next-page selectors
 
-**Not yet implemented (Phase 2+):**
-- Web scraping logic
-- Data processing and transformation
+- ✅ **Dataset Profiles with Extraction Configuration** (`profiles/granit.py`, `profiles/blinkit.py`)
+  - GRANIT: Article number, EAN/GTIN, regional pricing (multi-country, VAT), specifications, compliance, inventory
+  - Blinkit: SKU, barcode, pricing (MRP, selling price, GST), packaging, supplier, inventory, delivery (Bengaluru pincodes)
+  - Extraction config with allowed domains, base URLs, JSON-LD types, field selectors
+
+- ✅ **Data Processor** (`processor.py`)
+  - Input loading from CSV and JSON files
+  - Data cleaning: whitespace normalization, empty-to-null, URL normalization, date parsing, decimal parsing
+  - Dataset-specific validation:
+    - GRANIT: Required fields, GTIN/EAN check digit, ISO country/currency codes, VAT range, net/gross price consistency
+    - Blinkit: Required fields, barcode/GTIN check digit, GST rate validation, MRP vs selling price, expiry vs manufacturing date, Bengaluru pincode validation
+  - Deduplication by composite keys (article_number+EAN for GRANIT, SKU+product_id for Blinkit)
+  - Processing pipeline with summary statistics
+
+- ✅ **CLI Integration** (`main.py`)
+  - `--dataset`: granit, blinkit, or all
+  - `--input`: custom input directory
+  - `--scrape`: enable web scraping
+  - `--max-records`: limit records processed
+
+**Not yet implemented (Phase 3+):**
 - MongoDB product persistence
 - Excel/CSV export generation
 
-## Upcoming Development Phases
+## Development Phases
 
-| Phase | Focus |
-|-------|-------|
-| Phase 2 | Web scraping implementation for both datasets |
-| Phase 3 | Data processing, validation, and MongoDB persistence |
-| Phase 4 | Excel/CSV export and reporting |
-| Phase 5 | Scheduling, monitoring, and production hardening |
+| Phase | Focus | Status |
+|-------|-------|--------|
+| Phase 1 | Project foundation, config, MongoDB, profiles, CLI | ✅ Complete |
+| Phase 2 | Web scraping, data processing, validation, deduplication | ✅ Complete |
+| Phase 3 | MongoDB persistence, bulk operations, indexing | 🔄 Planned |
+| Phase 4 | Excel/CSV export and reporting | 🔄 Planned |
+| Phase 5 | Scheduling, monitoring, production hardening | 🔄 Planned |
 
 ## Project Structure
 
@@ -108,6 +139,8 @@ web_scrap_python/
 ├── main.py              # CLI entry point
 ├── config.py            # Configuration management
 ├── database.py          # MongoDB connection manager
+├── scraper.py           # Web scraping module
+├── processor.py         # Data processing & validation
 ├── profiles/
 │   ├── __init__.py      # Profile registry
 │   ├── granit.py        # GRANIT dataset profile
@@ -115,7 +148,9 @@ web_scrap_python/
 ├── tests/
 │   ├── test_config.py
 │   ├── test_database.py
-│   └── test_profiles.py
+│   ├── test_profiles.py
+│   ├── test_scraper.py
+│   └── test_processor.py
 ├── output/              # Generated files (gitignored)
 ├── .env                 # Local environment (gitignored)
 ├── .env.example         # Template environment
@@ -134,7 +169,7 @@ pytest tests/
 pytest tests/ -v
 ```
 
-Tests use mocks and do not require actual MongoDB credentials.
+Tests use mocks and do not require actual MongoDB credentials or internet access.
 
 ## License
 
