@@ -11,7 +11,7 @@ def test_connect_db_success():
         mock_instance.admin.command.return_value = {"ok": 1}
         
         import database
-        client = database.connect_db()
+        client, db = database.connect_db()
         assert client == mock_instance
         mock_instance.admin.command.assert_called_once_with("ping")
 
@@ -32,8 +32,9 @@ def test_check_connection_success():
     import database
     with patch("database.connect_db") as mock_connect:
         mock_client = MagicMock()
+        mock_db = MagicMock()
         mock_client.admin.command.return_value = {"ok": 1}
-        mock_connect.return_value = mock_client
+        mock_connect.return_value = (mock_client, mock_db)
         
         connected, msg = database.check_connection()
         assert connected is True
